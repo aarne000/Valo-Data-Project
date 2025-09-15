@@ -1,0 +1,11 @@
+#quantity {
+    width: 3em;
+}
+
+#newcategory {
+    display: none;
+}
+
+#newlocation {
+    display: none;
+}
