@@ -27,6 +27,7 @@ button {
     outline: none;
     border: none;
     font-weight: bold;
+    font-size: 18px;
     width: 5em;
     padding: 5px;
     border-radius: 20px;
@@ -44,4 +45,8 @@ select {
 
 h1 {
     padding: 10px 10px 10px 20px;
+}
+
+html {
+    font-family: Verdana;
 }
