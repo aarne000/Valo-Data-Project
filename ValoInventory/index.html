@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Valo Inventory</title>
+		<link href="./style.css" rel="stylesheet">
+		<script src="./main.js"></script>
+        <script src="./database.js"></script>
+		<meta charset="UTF-8">
+    </head>
+    <body onload="main()">
+		<div id="main-div">
+            <div id="top-div">
+                <div id="browse-button" class="button-div">Click to browse</div>
+                <div id="add-button" class="button-div">Click to add</div>
+            </div>
+            <div id="add-div">
+                <fieldset>
+                    <legend>Add a new item</legend>
+                    <form id="form" accept-charset="UTF-8" autocomplete="off">
+                        <label for="description">Item description:</label><br>
+                        <textarea id="description" name="description" rows="2" cols="25"></textarea><br>
+                        <label for="quantity">Quantity:</label>
+                        <input id="quantity" type="number" name="quantity" value="1" min="1"><br>
+                        <label for="category">Category:</label><br>
+                        <select id="category" name="category">
+                            <option value="none" selected>Select a category</option>
+                            <option value="new">A new category:</option>
+                        </select>
+                        <input id="newcategory" type="text"><br>
+                        <label for="location">Location:</label><br>
+                        <select id="location" name="location">
+                            <option value="none" selected>Select a location</option>
+                            <option value="new">A new location:</option>
+                        </select>
+                        <input id="newlocation" type="text"><br><br>
+                    </form>
+                    <button id="submit-button">Submit</button><button id="reset-button">Reset</button>
+                </fieldset>
+            </div>
+            <div id="browse-div">
+                <label for="textsearch">Search for item:</label>
+                <input id="textsearch" type="text" name="textsearch" size="25">
+                <select id="categorysearch" name="categorysearch">
+                    <option value="all" selected>All categories</option>
+				</select>
+                <select id="locationsearch" name="locationsearch">
+                    <option value="all" selected>All locations</option>
+				</select>
+                <table id="data">
+                    <thead>
+                        <tr>
+                            <th class="pseudo-link">Item</th>
+                            <th class="pseudo-link">Quantity</th>
+                            <th class="pseudo-link">Category</th>
+                            <th class="pseudo-link">Location</th>
+                            <th class="pseudo-link">Time</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <p id=error></p>
+			<p id=test></p>
+		</div>
+    </body>
+</html>
