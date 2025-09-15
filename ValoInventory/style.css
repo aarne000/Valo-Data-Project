@@ -9,3 +9,40 @@
 #newlocation {
     display: none;
 }
+
+body {
+    padding: 10px;
+    background: lightgrey;
+}
+
+#main-div {
+    width: 45%;
+    padding: 25px;
+    background: lightskyblue;
+    border-radius: 10px;
+}
+
+button {
+    color: orange;
+    font-family: Garamond;
+    outline: none;
+    border: none;
+    font-weight: bold;
+    width: 5em;
+    padding: 5px;
+    border-radius: 20px;
+}
+
+input, textarea {
+    padding: 7px;
+    border-radius: 20px;
+}
+
+select {
+    padding: 5px;
+    border-radius: 20px;
+}
+
+h1 {
+    padding: 10px 10px 10px 20px;
+}

@@ -4,3 +4,5 @@ Fri Sep 12 2025,third,2,cat2,cat2
 Fri Sep 12 2025,djsfgnk,8,cat1,cat2
 Mon Sep 15 2025,Närhen munat,2,Olennaiset,Hylly
 Mon Sep 15 2025,Testi,10,Olennaiset,Hylly
+Mon Sep 15 2025,abc,13,Olennaiset,Hylly
+Mon Sep 15 2025,yolo,77,cat2,Hylly
