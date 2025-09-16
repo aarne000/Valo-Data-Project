@@ -21,6 +21,10 @@ body {
     border-radius: 10px;
 }
 
+#top-div {
+    padding: 0px 0px 15px 0px;
+}
+
 button {
     color: orange;
     font-family: Garamond;
