@@ -1,6 +1,8 @@
 const allData = [];                 // An array for holding all inventory data.
 const categories = new Set();       // A Set for holding the categories in the inventory data.
 const locations = new Set();        // A Set for holding the locations in the inventory data.
+let sorting = "date";               // A string to determine the sorting variable.
+let ascending = false;              // A boolean to determine how to sort.
 
 /*
     Adds event listeners to all the buttons and input elements on the main page.
@@ -21,68 +23,42 @@ function main() {
             printData();
         }
     });
+    let links = document.getElementsByClassName("pseudo-link");
+    for(let i = 0; i < links.length; i++) {
+        links[i].addEventListener("click", sortingEvent);
+    }
     browseMode();
 }
 
 /*
-    Sends the data to the server using fetch and the POST method.
-    The data sent is a FormData object with the following properties:
-    description, quantity, category, location, newcategory, newlocation and date.
-    Properties newcategory and newlocation should be used only if
-    the respective properties category and location are set to "new".
-    The data can be accessed with PHP like this: $_POST["date"] etc.
-    Expects a string "success" as result.
-    The date information is currently a little messed up.
-    Also the file name needs to be updated.
+    Calls the saveData function with the necessary data from the html form.
+    The date information might currently be a little messed up.
 */
 async function submit() {
 	if (validate()) {
-        /* old version
-		const form = document.getElementById("form");
-		const data = new FormData(form);
-		const date = new Date();
-		data.set("time", date.toLocaleString("en-GB", {
-            timeZone: "UTC",
-            timeZoneName: "short"
-        }));                    // Probably the wrong time zone and format
-        try {
-            const response = await fetch("placeholder.php", {      //Change filename here
-                method: "POST",
-                body: data
-            })
-            const result = await response.text();
-            if (result == "success") {
-                document.getElementById("test").innerText = "Data added successfully!"
-                fetchAll(false);
-                reset(false);
-            } else {
-                document.getElementById("test").innerText = "Not sure what happened!"
-            }
-        } catch (e) {
-            error("Error: " + e.message);
-        }
-        */
-	if (validate()) {
+        let newstuff = false;
 		const date = new Date();
         let item = document.getElementById("description").value;
         let quantity = document.getElementById("quantity").value;
         let category = document.getElementById("category").value;
         if (category == "new") {
             category = document.getElementById("newcategory").value;
+            newstuff = true;
         }
         let location = document.getElementById("location").value;
         if (location == "new") {
             location = document.getElementById("newlocation").value;
+            newstuff = true;
         }
         try {
             saveData(date.toDateString(), item, quantity, category, location);
-            fetchAll(false);
+            if (newstuff) {
+                fetchAll(false);
+            }
             reset(false);
         } catch (e) {
             error("Error: " + e.message);
         }
-    }
-
     }
 }
 
@@ -91,7 +67,7 @@ async function submit() {
     Also updates the categories and locations Sets and
     the respective drop-down boxes.
     If the parameter print is set to true,
-    calls the function for printing the inventory data.
+    calls the functions for sorting and printing the inventory data.
 */
 async function fetchAll(print = true) {
     try {
@@ -133,6 +109,7 @@ async function fetchAll(print = true) {
             select2.children[0].after(newOption.cloneNode(true));
         }
         if (print) {
+            sortData();
             printData();
         }
     } catch (e) {
@@ -142,9 +119,7 @@ async function fetchAll(print = true) {
 
 /*
     Displays the inventory data in a table form
-    Ordering is not currently implemented.
 */
-
 function printData() {
     let table = document.getElementById("data");
     while (table.childElementCount > 1) {
@@ -208,22 +183,6 @@ function browseMode() {
     document.getElementById("locationsearch").value = "all";
     fetchAll();
 }
-/*
-async function browseMode() {
-    error("");
-    document.getElementById("add-div").style.display = "none";
-    document.getElementById("browse-div").style.display = "block";
-    //More stuff to be added here.
-    //writeDataToTestDiv()
-    //document.getElementById("test").innerText = await getData()
-    const data = await getData()
-    for (i in data) {
-        document.getElementById("test").innerText += "Date: " + data[i][0] +
-            " Description: " + data[i][1] + " Quantity: " + data[i][2] + 
-            " Category: " + data[i][3] + " Location: " + data[i][4] + "\n"
-    }
-}
-*/
 
 /*
     Switches the UI to display the form for adding new items to the inventory.
@@ -317,6 +276,138 @@ function locationChange() {
 }
 
 /*
+    Sets the global sorting variables and
+    calls the functions for sorting and printing the data.
+    Should be called when the user wants to sort the data.
+*/
+function sortingEvent(e) {
+    switch(e.target.getAttribute("id")) {
+        case "name-heading":
+            if (sorting == "name") {
+                ascending = !ascending;
+            } else {
+                sorting = "name";
+                ascending = true;
+            }
+            break;
+        case "category-heading":
+            if (sorting == "category") {
+                ascending = !ascending;
+            } else {
+                sorting = "category";
+                ascending = true;
+            }
+            break;
+        case "location-heading":
+            if (sorting == "location") {
+                ascending = !ascending;
+            } else {
+                sorting = "location";
+                ascending = true;
+            }
+            break;
+        case "date-heading":
+            if (sorting == "date") {
+                ascending = !ascending;
+            } else {
+                sorting = "date";
+                ascending = true;
+            }
+    }
+    sortData();
+    printData();
+}
+
+/*
+    Sorts the inventory data.
+*/
+function sortData() {
+    switch(sorting) {
+        case "date":
+            allData.sort(sortByDate);
+            break;
+        case "name":
+            allData.sort(sortByName);
+            break;
+        case "category":
+            allData.sort(sortByCategory);
+            break;
+        case "location":
+            allData.sort(sortByLocation);
+    }
+}
+
+/*
+    Sorts the inventory data by item name.
+    Feed this function to the sort() function.
+*/
+function sortByName(a, b) {
+    if (a[1].toLowerCase() === b[1].toLowerCase()) {
+        return 0;
+    }
+    else {
+        if (ascending) {
+            return (a[1].toLowerCase() < b[1].toLowerCase()) ? -1 : 1;
+        } else {
+            return (a[1].toLowerCase() > b[1].toLowerCase()) ? -1 : 1;
+        }
+    }
+}
+
+/*
+    Sorts the inventory data by category.
+    Feed this function to the sort() function.
+*/
+function sortByCategory(a, b) {
+    if (a[3].toLowerCase() === b[3].toLowerCase()) {
+        return 0;
+    }
+    else {
+        if (ascending) {
+            return (a[3].toLowerCase() < b[3].toLowerCase()) ? -1 : 1;
+        } else {
+            return (a[3].toLowerCase() > b[3].toLowerCase()) ? -1 : 1;
+        }
+    }
+}
+
+/*
+    Sorts the inventory data by location.
+    Feed this function to the sort() function.
+*/
+function sortByLocation(a, b) {
+    if (a[4].toLowerCase() === b[4].toLowerCase()) {
+        return 0;
+    }
+    else {
+        if (ascending) {
+            return (a[4].toLowerCase() < b[4].toLowerCase()) ? -1 : 1;
+        } else {
+            return (a[4].toLowerCase() > b[4].toLowerCase()) ? -1 : 1;
+        }
+    }
+}
+
+/*
+    Sorts the inventory data by input date.
+    Feed this function to the sort() function.
+*/
+function sortByDate(a, b) {
+    const date1 = new Date(a[0]);
+    const date2 = new Date(b[0]);
+    if (date1.getTime() === date2.getTime()) {
+        return 0;
+    }
+    else {
+        if (ascending) {
+            return (date1 < date2) ? -1 : 1;
+        } else {
+            return (date1 > date2) ? -1 : 1;
+        }
+    }
+}
+
+/*
     Prints errors for the user to see.
     If the parameter add is true, the parameter text is added to the end of the existing error message.
     Otherwise the current error message is replaced with the parameter text.
@@ -341,14 +432,3 @@ function testi(text, add = false) {
         testi.innerHTML = text
     }
 }
-
-const testData = [[1, "Pallohiiri", 1, "Hiiret", "Hylly 1" , new Date()],
-                [2, "Optinen hiiri", 1, "Hiiret", "Hylly 1" , new Date()],
-                [3, "Pussillinen hiiriä", 10, "Hiiret", "Hylly 1" , new Date()],
-                [4, "USB-näppäimistö", 1, "Näppäimistöt", "Hylly 1" , new Date()],
-                [5, "Näppäimistö", 2, "Näppäimistöt", "Hylly 2" , new Date()],
-                [6, "USB-näppäimistö", 1, "Näppäimistöt", "Hylly 2" , new Date()],
-                [7, "RAM-muisti", 5, "RAM", "Hylly 1" , new Date()],
-                [8, "Kovalevy 500 GB", 2, "Tallennustilat", "Luola" , new Date()],
-                [9, "Kovalevy 1 TB", 3, "Tallennustilat", "Luola" , new Date()],
-                [10, "SSD 500 GB", 2, "Tallennustilat", "Hylly 2" , new Date()]]
