@@ -21,11 +21,7 @@ function main() {
     document.getElementById("locationsearch").addEventListener("change", printData);
     document.getElementById("fin").addEventListener("click", changeLang);
     document.getElementById("eng").addEventListener("click", changeLang);
-    document.getElementById("textsearch").addEventListener("keypress", (e)=>{
-        if (e.key === "Enter") {
-            printData();
-        }
-    });
+    document.getElementById("textsearch").addEventListener("input", ()=>{printData();});
     let links = document.getElementsByClassName("pseudo-link");
     for(let i = 0; i < links.length; i++) {
         links[i].addEventListener("click", sortingEvent);
@@ -34,8 +30,7 @@ function main() {
 }
 
 /*
-    Calls the saveData function with the necessary data from the html form.
-    The date information might currently be a little messed up.
+    Calls the addItem function with the necessary data from the html form.
 */
 async function submit() {
 	if (validate()) {
@@ -55,7 +50,7 @@ async function submit() {
             newLocation = true;
         }
         try {
-            saveData(date.toDateString(), item, quantity, category, location);
+            addItem(date.toLocaleDateString(), item, quantity, category, location);
             if (newCategory || newLocation) {
                 fetchAll(false, newCategory, newLocation);
             }
@@ -76,12 +71,14 @@ async function submit() {
 */
 async function fetchAll(print = true, newCat = true, newLoc = true) {
     try {
-        const data = await getData()
+        const data = await getItems()
         allData.length = 0;
+        categories.clear();
+        locations.clear();
         for (let i = 0; i < data.length; i++) {
             allData.push(data[i]);
-            categories.add(data[i][3]);
-            locations.add(data[i][4].trim());
+            categories.add(data[i].category);
+            locations.add(data[i].location);
         }
         let select1, select2;
         if (newCat) {
@@ -129,7 +126,6 @@ async function fetchAll(print = true, newCat = true, newLoc = true) {
 
 /*
     Displays the inventory data in a table form.
-    Missing the id info for deleting.
 */
 function printData() {
     let table = document.getElementById("data");
@@ -144,13 +140,13 @@ function printData() {
         let location = document.createElement("TD");
         let time = document.createElement("TD");
         let del = document.createElement("TD");
-        item.innerText = allData[i][1];
-        quantity.innerText = allData[i][2];
-        category.innerText = allData[i][3];
-        location.innerText = allData[i][4];
-        time.innerText = allData[i][0];
+        item.innerText = allData[i].description;
+        quantity.innerText = allData[i].quantity;
+        category.innerText = allData[i].category;
+        location.innerText = allData[i].location;
+        time.innerText = allData[i].date;
         del.innerHTML = '<img src="/svg/trashcan.svg" alt="Delete item" width="20" height="25">';
-        del.children[0].setAttribute("id", i);      // Get the actual id of the item instead of this.
+        del.children[0].setAttribute("id", allData[i].id);
         del.children[0].addEventListener("click", deleteItem);
         row.append(item, quantity, category, location, time, del);
         let itemMatch = true;
@@ -184,13 +180,13 @@ function printData() {
 
 /*
     A function to be called when the user wants to delete an item.
-    A work in progress.
-    Currently only deletes the item from the table, not the database.
+    Calls the funtion removeItem, which should remove the item from the database.
+    Calls fetchAll to update the UI.
 */
 function deleteItem(e) {
     let td = e.target;
-    td.parentElement.parentElement.remove();
-    testi("Removed item " + td.getAttribute("id"));
+    removeItem(td.getAttribute("id"));
+    fetchAll();
 }
 
 /*
@@ -286,10 +282,10 @@ function validate() {
 */
 function categoryChange() {
     if (document.getElementById("category").value == "new") {
+        document.getElementById("newcategory").value = "";
         document.getElementById("newcategory").style.display = "block";
         document.getElementById("newcategory").focus();
     } else {
-        document.getElementById("newcategory").value = "";
         document.getElementById("newcategory").style.display = "none";
     }
 }
@@ -300,10 +296,10 @@ function categoryChange() {
 */
 function locationChange() {
     if (document.getElementById("location").value == "new") {
+        document.getElementById("newlocation").value = "";
         document.getElementById("newlocation").style.display = "block";
         document.getElementById("newlocation").focus();
     } else {
-        document.getElementById("newlocation").value = "";
         document.getElementById("newlocation").style.display = "none";
     }
 }
@@ -375,14 +371,14 @@ function sortData() {
     Feed this function to the sort() function.
 */
 function sortByName(a, b) {
-    if (a[1].toLowerCase() === b[1].toLowerCase()) {
+    if (a.description.toLowerCase() === b.description.toLowerCase()) {
         return 0;
     }
     else {
         if (ascending) {
-            return (a[1].toLowerCase() < b[1].toLowerCase()) ? -1 : 1;
+            return (a.description.toLowerCase() < b.description.toLowerCase()) ? -1 : 1;
         } else {
-            return (a[1].toLowerCase() > b[1].toLowerCase()) ? -1 : 1;
+            return (a.description.toLowerCase() > b.description.toLowerCase()) ? -1 : 1;
         }
     }
 }
@@ -392,14 +388,14 @@ function sortByName(a, b) {
     Feed this function to the sort() function.
 */
 function sortByCategory(a, b) {
-    if (a[3].toLowerCase() === b[3].toLowerCase()) {
+    if (a.category.toLowerCase() === b.category.toLowerCase()) {
         return 0;
     }
     else {
         if (ascending) {
-            return (a[3].toLowerCase() < b[3].toLowerCase()) ? -1 : 1;
+            return (a.category.toLowerCase() < b.category.toLowerCase()) ? -1 : 1;
         } else {
-            return (a[3].toLowerCase() > b[3].toLowerCase()) ? -1 : 1;
+            return (a.category.toLowerCase() > b.category.toLowerCase()) ? -1 : 1;
         }
     }
 }
@@ -409,14 +405,14 @@ function sortByCategory(a, b) {
     Feed this function to the sort() function.
 */
 function sortByLocation(a, b) {
-    if (a[4].toLowerCase() === b[4].toLowerCase()) {
+    if (a.location.toLowerCase() === b.location.toLowerCase()) {
         return 0;
     }
     else {
         if (ascending) {
-            return (a[4].toLowerCase() < b[4].toLowerCase()) ? -1 : 1;
+            return (a.location.toLowerCase() < b.location.toLowerCase()) ? -1 : 1;
         } else {
-            return (a[4].toLowerCase() > b[4].toLowerCase()) ? -1 : 1;
+            return (a.location.toLowerCase() > b.location.toLowerCase()) ? -1 : 1;
         }
     }
 }
@@ -426,8 +422,8 @@ function sortByLocation(a, b) {
     Feed this function to the sort() function.
 */
 function sortByDate(a, b) {
-    const date1 = new Date(a[0]);
-    const date2 = new Date(b[0]);
+    const date1 = new Date(a.date);
+    const date2 = new Date(b.date);
     if (date1.getTime() === date2.getTime()) {
         return 0;
     }
