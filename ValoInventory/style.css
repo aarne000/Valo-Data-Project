@@ -19,10 +19,12 @@ body {
     padding: 25px;
     background: lightskyblue;
     border-radius: 10px;
+    position: relative;
 }
 
 #top-div {
     padding: 0px 0px 15px 0px;
+    position: relative;
 }
 
 button {
@@ -57,4 +59,13 @@ html {
 
 #eng {
     display: none;
+    margin-left: 34%;
+}
+
+#fin {
+    margin-left: 34%;
+}
+
+tr {
+    cursor: pointer;
 }
