@@ -51,6 +51,7 @@ select {
 
 h1 {
     padding: 10px 10px 10px 20px;
+    float: left;
 }
 
 html {
@@ -59,13 +60,14 @@ html {
 
 #eng {
     display: none;
-    margin-left: 34%;
+    padding: 30px 10px 10px 20px;
 }
 
 #fin {
-    margin-left: 34%;
+    padding: 30px 10px 10px 20px;
+    margin-left: 32px;
 }
 
-tr {
+th {
     cursor: pointer;
 }
