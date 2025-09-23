@@ -40,6 +40,7 @@ function initDatabase() {
 
     request.onsuccess = function (event) {
         db = event.target.result;
+        browseMode();
     };
 
     request.onupgradeneeded = function (event) {
