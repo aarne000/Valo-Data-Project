@@ -50,7 +50,7 @@ async function submit() {
             newLocation = true;
         }
         try {
-            addItem(date.toLocaleDateString(), item, quantity, category, location);
+            addItem(date.getTime(), item, quantity, category, location);
             if (newCategory || newLocation) {
                 fetchAll(false, newCategory, newLocation);
             }
@@ -144,10 +144,13 @@ function printData() {
         quantity.innerText = allData[i].quantity;
         category.innerText = allData[i].category;
         location.innerText = allData[i].location;
-        time.innerText = allData[i].date;
+        let date = new Date(allData[i].date)
+        time.innerText = date.toLocaleDateString();
         del.innerHTML = '<img src="/svg/trashcan.svg" alt="Delete item" width="20" height="25">';
-        del.children[0].setAttribute("id", allData[i].id);
+        del.innerHTML += '<img src="/svg/edit.svg" alt="Edit item" width="20" height="25">';
+        del.setAttribute("id", allData[i].id);
         del.children[0].addEventListener("click", deleteItem);
+        del.children[1].addEventListener("click", editItem);
         row.append(item, quantity, category, location, time, del);
         let itemMatch = true;
         let categoryMatch = true;
@@ -184,9 +187,18 @@ function printData() {
     Calls fetchAll to update the UI.
 */
 function deleteItem(e) {
-    let td = e.target;
+    let td = e.target.parentElement;
     removeItem(td.getAttribute("id"));
     fetchAll();
+}
+
+/*
+    A function to be called when the user wants to edit an item.
+    A work in progress.
+*/
+function editItem(e) {
+    let td = e.target.parentElement;
+    testi(td.getAttribute("id"));
 }
 
 /*
@@ -342,6 +354,14 @@ function sortingEvent(e) {
                 sorting = "date";
                 ascending = true;
             }
+            break;
+        case "quantity-heading":
+            if (sorting == "quantity") {
+                ascending = !ascending;
+            } else {
+                sorting = "quantity";
+                ascending = true;
+            }
     }
     sortData();
     printData();
@@ -363,6 +383,9 @@ function sortData() {
             break;
         case "location":
             allData.sort(sortByLocation);
+            break;
+        case "quantity":
+            allData.sort(sortByQuantity)
     }
 }
 
@@ -429,9 +452,26 @@ function sortByDate(a, b) {
     }
     else {
         if (ascending) {
-            return (date1 < date2) ? -1 : 1;
+            return (date1.getTime() < date2.getTime()) ? -1 : 1;
         } else {
-            return (date1 > date2) ? -1 : 1;
+            return (date1.getTime() > date2.getTime()) ? -1 : 1;
+        }
+    }
+}
+
+/*
+    Sorts the inventory data by quantity.
+    Feed this function to the sort() function.
+*/
+function sortByQuantity(a, b) {
+    if (parseInt(a.quantity) === parseInt(b.quantity)) {
+        return 0;
+    }
+    else {
+        if (ascending) {
+            return (parseInt(a.quantity) < parseInt(b.quantity)) ? -1 : 1;
+        } else {
+            return (parseInt(a.quantity) > parseInt(b.quantity)) ? -1 : 1;
         }
     }
 }

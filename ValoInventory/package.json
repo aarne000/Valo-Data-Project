@@ -2,7 +2,7 @@
   "name": "valoinventory",
   "main": "index.html",
   "window": {
-    "height": 500,
-    "width": 700
+    "height": 600,
+    "width": 800
   }
 }
