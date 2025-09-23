@@ -3,6 +3,7 @@
 ## How To Use
 
 1. Install NW.JS from [https://nwjs.io/]
+
 2. Add the nwjs folder to the PATH:
 - First search for "Edit the System environment variables" in the windows search bar
 - Then click on "Environment Variables"

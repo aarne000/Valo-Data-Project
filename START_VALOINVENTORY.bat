@@ -1,0 +1,1 @@
+START /B nw.exe ValoInventory
