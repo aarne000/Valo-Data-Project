@@ -28,7 +28,7 @@ body {
 }
 
 button {
-    color: orange;
+    color: black;
     font-family: Garamond;
     outline: none;
     border: none;
@@ -52,6 +52,7 @@ select {
 h1 {
     padding: 10px 10px 10px 20px;
     float: left;
+    width: 350px;
 }
 
 html {
@@ -59,13 +60,11 @@ html {
 }
 
 #eng {
-    display: none;
     padding: 30px 10px 10px 20px;
 }
 
 #fin {
     padding: 30px 10px 10px 20px;
-    margin-left: 32px;
 }
 
 th {

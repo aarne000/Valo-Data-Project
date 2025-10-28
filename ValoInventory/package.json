@@ -2,7 +2,8 @@
   "name": "valoinventory",
   "main": "index.html",
   "window": {
-    "height": 600,
-    "width": 800
+    "id": "valoinventory",
+    "width": 1920,
+    "height": 1080
   }
 }

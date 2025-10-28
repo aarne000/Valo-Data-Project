@@ -4,10 +4,12 @@ const locations = new Set();        // A Set for holding the locations in the in
 let sorting = "date";               // A string to determine the sorting variable.
 let ascending = false;              // A boolean to determine how to sort.
 let lang = 0;                       // A variable for switching language. 0 is English, 1 is Finnish.
+let editing = false;                // A boolean to indicate whether the user is editing or adding an item.
+let loading = 0;                    // A number indicating loading progress during launch. 2 means finished.
 
 /*
     Adds event listeners to all the buttons and input elements on the main page.
-    Should be called when the page is finished loading.
+    Should be called when the page is loaded and the database is initialized.
 */
 function main() {
     document.getElementById("browse-button").addEventListener("click", browseMode);
@@ -26,12 +28,21 @@ function main() {
     for(let i = 0; i < links.length; i++) {
         links[i].addEventListener("click", sortingEvent);
     }
-    //setTimeout(browseMode, 1000)
-    //browseMode();
+    browseMode();
 }
 
 /*
-    Calls the addItem function with the necessary data from the html form.
+    Checks to see if loading the app has finished.
+    Should be called when the page is finished loading and
+    when the database is initialized.
+*/
+function loaded() {
+    loading++;
+    if (loading == 2) {main();}
+}
+
+/*
+    Calls the appropriate functions for adding or editing an item.
 */
 async function submit() {
 	if (validate()) {
@@ -51,11 +62,19 @@ async function submit() {
             newLocation = true;
         }
         try {
-            addItem(date.getTime(), item, quantity, category, location);
-            if (newCategory || newLocation) {
-                fetchAll(false, newCategory, newLocation);
+            if (!editing) {
+                addItem(date.getTime(), item, quantity, category, location);
+                if (newCategory || newLocation) {
+                    fetchAll(false, newCategory, newLocation);
+                }
+                reset(false);
+                const strings = ["Item added successfully", "Tuote lisätty onnistuneesti."];
+                alert(strings[lang]);
+            } else {
+                removeItem(document.getElementById("hidden-input").value);
+                addItem(date.getTime(), item, quantity, category, location);
+                browseMode();
             }
-            reset(false);
         } catch (e) {
             error("Error: " + e.message);
         }
@@ -151,7 +170,7 @@ function printData() {
         del.innerHTML += '<img src="/svg/edit.svg" alt="Edit item" width="20" height="25">';
         del.setAttribute("id", allData[i].id);
         del.children[0].addEventListener("click", deleteItem);
-        del.children[1].addEventListener("click", editItem);
+        del.children[1].addEventListener("click", editMode);
         row.append(item, quantity, category, location, time, del);
         let itemMatch = true;
         let categoryMatch = true;
@@ -188,18 +207,13 @@ function printData() {
     Calls fetchAll to update the UI.
 */
 function deleteItem(e) {
-    let td = e.target.parentElement;
-    removeItem(td.getAttribute("id"));
-    fetchAll();
-}
-
-/*
-    A function to be called when the user wants to edit an item.
-    A work in progress.
-*/
-function editItem(e) {
-    let td = e.target.parentElement;
-    testi(td.getAttribute("id"));
+    const conf = ["Are you sure you want to delete?", "Oletko varma, että haluat poistaa?"]
+    if (confirm(conf[lang]) == true)
+    {
+        let td = e.target.parentElement;
+        removeItem(td.getAttribute("id"));
+        fetchAll();
+    }
 }
 
 /*
@@ -223,12 +237,38 @@ function browseMode() {
     Also resets the form.
 */
 function addMode() {
+    editing = false;
     error("");
     reset(true);
+    document.getElementById("edit-legend").style.display = "none";
+    document.getElementById("add-legend").style.display = "inline-block";
     document.getElementById("add-div").style.display = "block";
     document.getElementById("add-button").style.display = "none";
     document.getElementById("browse-div").style.display = "none";
     document.getElementById("browse-button").style.display = "inline-block";
+}
+
+/*
+    Switches the UI to display the form for editing items in the inventory.
+*/
+function editMode(e) {
+    editing = true;
+    error("");
+    let td = e.target.parentElement;
+    let tr = td.parentElement;
+    document.getElementById("location").value = tr.children[3].innerText;
+    document.getElementById("category").value = tr.children[2].innerText;
+    document.getElementById("quantity").value = tr.children[1].innerText;
+    document.getElementById("description").value = tr.children[0].innerText;
+    document.getElementById("newcategory").style.display = "none";
+    document.getElementById("newlocation").style.display = "none";
+    document.getElementById("add-legend").style.display = "none";
+    document.getElementById("edit-legend").style.display = "inline-block";
+    document.getElementById("add-div").style.display = "block";
+    document.getElementById("add-button").style.display = "none";
+    document.getElementById("browse-div").style.display = "none";
+    document.getElementById("browse-button").style.display = "inline-block";
+    document.getElementById("hidden-input").setAttribute("value", td.getAttribute("id"))
 }
 
 /*
@@ -483,20 +523,22 @@ function sortByQuantity(a, b) {
 */
 function changeLang(e) {
     if (e.target.getAttribute("id") == "eng") {
-        document.getElementById("eng").style.display = "none"
-        document.getElementById("fin").style.display = "inline-block"
+        //document.getElementById("eng").style.display = "none"
+        //document.getElementById("fin").style.display = "inline-block"
         lang = 0;
         document.getElementsByTagName("title")[0].innerText = "Valo Inventory";
         document.getElementsByTagName("h1")[0].innerText = "Valo Inventory";
         document.getElementById("browse-button").innerText = "Click to browse";
         document.getElementById("add-button").innerText = "Click to add";
-        document.getElementsByTagName("legend")[0].innerText = "Add a new item";
+        document.getElementById("add-legend").innerText = "Add a new item";
+        document.getElementById("edit-legend").innerText = "Edit an item";
         let labels = document.getElementsByTagName("label");
-        labels[0].innerText = "Item description:";
-        labels[1].innerText = "Quantity:";
-        labels[2].innerText = "Category:";
-        labels[3].innerText = "Location:";
-        labels[4].innerText = "Search for item:";
+        labels[0].innerText = "Item name:";
+        labels[1].innerText = "Item description:";
+        labels[2].innerText = "Quantity:";
+        labels[3].innerText = "Category:";
+        labels[4].innerText = "Location:";
+        labels[5].innerText = "Search for item:";
         let cats = document.getElementById("category");
         cats.children[0].innerText = "Select a category";
         cats.children[cats.children.length - 1].innerText = "A new category:";
@@ -514,20 +556,22 @@ function changeLang(e) {
         heads[3].innerText = "Location";
         heads[4].innerText = "Time";
     } else if (e.target.getAttribute("id") == "fin") {
-        document.getElementById("fin").style.display = "none"
-        document.getElementById("eng").style.display = "inline-block"
+        //document.getElementById("fin").style.display = "none"
+        //document.getElementById("eng").style.display = "inline-block"
         lang = 1;
         document.getElementsByTagName("title")[0].innerText = "Valo Inventaario";
         document.getElementsByTagName("h1")[0].innerText = "Valo Inventaario";
         document.getElementById("browse-button").innerText = "Paina selataksesi";
         document.getElementById("add-button").innerText = "Paina lisätäksesi";
-        document.getElementsByTagName("legend")[0].innerText = "Lisää uusi tuote";
+        document.getElementById("add-legend").innerText = "Lisää uusi tuote";
+        document.getElementById("edit-legend").innerText = "Muokkaa tuotetta";
         let labels = document.getElementsByTagName("label");
-        labels[0].innerText = "Tuotteen kuvaus:";
-        labels[1].innerText = "Määrä:";
-        labels[2].innerText = "Kategoria:";
-        labels[3].innerText = "Sijainti:";
-        labels[4].innerText = "Etsi tuotetta:";
+        labels[0].innerText = "Tuotteen nimi:";
+        labels[1].innerText = "Tuotteen kuvaus:";
+        labels[2].innerText = "Määrä:";
+        labels[3].innerText = "Kategoria:";
+        labels[4].innerText = "Sijainti:";
+        labels[5].innerText = "Etsi tuotetta:";
         let cats = document.getElementById("category");
         cats.children[0].innerText = "Valitse kategoria";
         cats.children[cats.children.length - 1].innerText = "Uusi kategoria:";
@@ -573,3 +617,10 @@ function testi(text, add = false) {
         testi.innerHTML = text
     }
 }
+
+/*
+    To do:
+    Separate item name and item description.
+    Subcategories.
+    Merging identical or near identical items.
+*/

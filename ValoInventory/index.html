@@ -7,7 +7,7 @@
         <script src="./database.js"></script>
 		<meta charset="UTF-8">
     </head>
-    <body onload="main()">
+    <body onload="loaded()">
             <div>
                 <h1>Valo Inventory</h1>
                 <img src="./svg/eng.svg" id="eng" class="flag" alt="In English" width="64" height="48">
@@ -21,8 +21,11 @@
                 
             </div>
             <div id="add-div">
-                    <legend>Add a new item</legend>
+                    <legend id="add-legend">Add a new item</legend>
+                    <legend id="edit-legend">Edit an item</legend>
                     <form id="form" accept-charset="UTF-8" autocomplete="off">
+                        <label for="name">Item name:</label><br>
+                        <input type="text" id="name" name="name" size="25">
                         <label for="description">Item description:</label><br>
                         <textarea id="description" name="description" rows="2" cols="25"></textarea><br>
                         <label for="quantity">Quantity:</label>
@@ -39,6 +42,7 @@
                             <option value="new">A new location:</option>
                         </select>
                         <input id="newlocation" type="text"><br><br>
+                        <input id="hidden-input" type="hidden">
                     </form>
                     <button id="submit-button">Submit</button>&nbsp<button id="reset-button">Reset</button>
             </div>
